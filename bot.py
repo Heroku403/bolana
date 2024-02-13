@@ -44,6 +44,9 @@ def record_m3u8(update: Update, context: CallbackContext):
         update.message.reply_text("Invalid duration specified. Please enter a valid integer for duration.")
         return
 
+    # Send a message indicating that the recording is starting
+    start_message = update.message.reply_text("Recording will start. Please wait...")
+
     # Start ffmpeg process to record m3u8 link
     process = subprocess.Popen(['ffmpeg', '-i', link, '-t', str(duration), '-c', 'copy', file_name])
     context.user_data['process'] = process
@@ -58,9 +61,11 @@ def record_m3u8(update: Update, context: CallbackContext):
             context.bot.send_document(chat_id=update.effective_chat.id, document=f, filename=file_name)
 
         os.remove(file_name)  # Remove the file after uploading
+        start_message.delete()  # Delete the start message
         update.message.reply_text("Recording completed and file uploaded.")
     else:
         update.message.reply_text("Error: Recording failed.")
+
 
 def main():
     updater = Updater(TOKEN, use_context=True)
