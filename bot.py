@@ -48,11 +48,16 @@ def record_m3u8(update: Update, context: CallbackContext):
     start_message = update.message.reply_text("Recording will start. Please wait...")
 
     # Start ffmpeg process to record m3u8 link
-    process = subprocess.Popen(['ffmpeg', '-i', link, '-t', str(duration), '-c', 'copy', file_name])
+    process = subprocess.Popen(['ffmpeg', '-i', link, '-t', str(duration), '-c', 'copy', file_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     context.user_data['process'] = process
 
-    # Wait for the recording to complete
-    process.wait()
+    # Update the message with progress status until the recording is complete
+    while True:
+        output = process.stderr.readline()
+        if process.poll() is not None:
+            break
+        if output:
+            update.message.edit_text(f"Recording in progress: {output.decode('utf-8').strip()}")
 
     # Check if the file exists
     if os.path.exists(file_name):
@@ -65,6 +70,7 @@ def record_m3u8(update: Update, context: CallbackContext):
         update.message.reply_text("Recording completed and file uploaded.")
     else:
         update.message.reply_text("Error: Recording failed.")
+
 
 
 def main():
