@@ -54,14 +54,6 @@ def record_m3u8(update: Update, context: CallbackContext):
     # Check if the file exists
     if os.path.exists(file_name):
         with open(file_name, 'rb') as f:
-            # Send a message indicating that the file is being uploaded
-            message = update.message.reply_text("Uploading recording to Telegram...", timeout=600)
-
-            # Simulate upload progress
-            for i in range(11):
-                time.sleep(1)
-                message.edit_text(f"Uploading recording to Telegram... {i * 10}%")
-
             # Upload the file to Telegram
             context.bot.send_document(chat_id=update.effective_chat.id, document=f, filename=file_name)
 
